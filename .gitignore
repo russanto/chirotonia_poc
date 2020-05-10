@@ -1,0 +1,10 @@
+.cache
+.DS_Store
+.bash_history
+
+*.abi
+*.bin
+
+__pycache__
+runs
+venv

@@ -1,0 +1,24 @@
+version: "3.2"
+services:
+    contract_compiler:
+        image: ethereum/solc:0.5.13
+        container_name: chirotonia_compiler
+        volumes: 
+            - .:/chirotonia
+        command: -o /chirotonia --abi --bin --optimize /chirotonia/contracts/Chirotonia.sol --overwrite
+    node:
+        build: ./demo-network
+        image: ethereum-clique
+        container_name: chirotonia_ethereum_clique
+        volumes:
+            - ./demo-network/keys:/root/.ethereum/keystore
+        ports:
+            - 8545:8545
+        command: --unlock 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --password /root/.ethereum/keystore/password --mine --minerthreads 1 --etherbase 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --rpc --rpcaddr 0.0.0.0 --rpcvhosts=* --rpcapi admin,eth,miner,personal,web3 --allow-insecure-unlock --nodiscover --nousb --gasprice 1
+        depends_on:
+            - contract_compiler
+        networks: 
+            - chirotonia
+networks: 
+    chirotonia:
+        attachable: true

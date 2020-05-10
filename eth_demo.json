@@ -1,0 +1,21 @@
+{
+    "manager": "0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2",
+    "managerPassword": "password",
+    "identityManager": "0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2",
+    "identityManagerPassword": "password",
+    "votersAddress": "0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2",
+    "votersAddressPassword": "password",
+    "votes": [{
+        "name": "TheHardestChoice",
+        "subject": "What's your starter ?",
+        "choices": ["Bulbasaur", "Charmander", "Squirtle"],
+        "ballots": [1,0,2,2,1,0,1],
+        "voters": 8
+    },{
+        "name": "RateMayor",
+        "subject": "Give a rate to your mayor",
+        "choices":["0","1","2","3","4","5"],
+        "ballots": [0,0,2,5,3,1,4,2,1],
+        "voters": 10
+    }]
+}
