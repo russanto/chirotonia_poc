@@ -63,9 +63,12 @@ for vote in session_conf['votes']:
     logger.info('Inserting ballots for vote %s', vote['name'])
     for i, ballot in enumerate(vote['ballots']):
         voted_ballot = voters[i].ring_sign(pkeys, Voter.pack_vote_in_random32(bytes([ballot])))
-        chirotonia.vote(vote['name'], voted_ballot)
+        txs.append(chirotonia.vote(vote['name'], voted_ballot))
+    gasSpent = 0
     for tx in txs:
-        chirotonia.wait(tx)
+        tx_rcpt = chirotonia.wait(tx)
+        gasSpent += tx_rcpt.gasUsed
+    logger.info("Gas spent %d", gasSpent)
     logger.info('Ballots for vote %s successfully inserted', vote['name'])
     vote['status'] = 'voted'
 

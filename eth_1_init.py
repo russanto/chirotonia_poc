@@ -66,6 +66,7 @@ logger.info("Deploying Chirotonia contract")
 tx_receipt = chirotonia.deploy(chirotonia_conf["identityManager"])
 chirotonia_conf["mainContract"] = tx_receipt.contractAddress
 logger.info("Deployed contract at %s", tx_receipt.contractAddress)
+logger.info("Gas spent %d", tx_receipt.gasUsed)
 
 if "votes" not in chirotonia_conf:
     logger.warning("No votations have been found. Add manually one to register voters")
@@ -80,13 +81,15 @@ for vote in chirotonia_conf["votes"]:
         if "subject" not in vote:
             logger.warning("Vote %s skipped due to missing subject")
             continue
-        chirotonia.create_vote(vote["name"], vote["subject"], sync=True)
+        tx_rcpt = chirotonia.create_vote(vote["name"], vote["subject"], sync=True)
+        logger.info("Gas spent %d", tx_rcpt.gasUsed)
         logger.info("Created vote %s, adding choices...", vote["name"])
         txs = []
         for i, choice in enumerate(vote["choices"]):
             txs.append(chirotonia.set_choice(vote["name"], i+1, choice))
         for tx in txs:
-            chirotonia.wait(tx)
+            tx_rcpt = chirotonia.wait(tx)
+            logger.info("Gas spent %d", tx_rcpt.gasUsed)
         logger.info("Choices added")
     except Exception as error:
         logger.error(error)

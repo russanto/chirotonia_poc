@@ -60,12 +60,15 @@ for i, vote in enumerate(session_conf['votes']):
     registration_txs = []
     logger.info("Registering voters for vote %s", vote['name'])
     for i in range(vote['voters']):
-        logger.debug("Registering voter %s for vote %s", voters[i].description, vote['name'])
+        logger.info("Registering voter %s for vote %s", voters[i].description, vote['name'])
         tx_hash = chirotonia.register_voter(voters[i].description, voters[i].public_key[0].n, voters[i].public_key[1].n, vote['name'], sync=False)
         registration_txs.append(tx_hash)
     logger.info("Waiting registration txs for vote %s", vote['name'])
+    gasSpent = 0
     for tx in registration_txs:
-        chirotonia.wait(tx)
+        tx_rcpt = chirotonia.wait(tx)
+        gasSpent += tx_rcpt.gasUsed
+    logger.info("Gas spent %d", gasSpent)
     logger.info("Registrations for vote %s completed", vote['name'])
     
 

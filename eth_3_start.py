@@ -57,7 +57,8 @@ if args.all:
             logger.error('Error starting vote %s', vote['name'])
     for name, tx in txs.items():
         try:
-            chirotonia.wait(tx)
+            tx_rcpt = chirotonia.wait(tx)
+            logger.info("Gas spent %d", tx_rcpt.gasUsed)
             logger.info("Vote %s successfully started", name)
             for vote in session_conf['votes']:
                 if vote['name'] == name:
@@ -69,7 +70,8 @@ elif args.vote:
     for vote in session_conf['votes']:
         if args.vote == vote['name']:
             logger.info("Starting vote %s", vote['name'])
-            chirotonia.start_vote(args.vote, sync=True)
+            tx_rcpt = chirotonia.start_vote(args.vote, sync=True)
+            logger.info("Gas spent %d", tx_rcpt.gasUsed)
             logger.info("Vote %s successfully started", vote['name'])
             vote['status'] = 'started'
             found = True
