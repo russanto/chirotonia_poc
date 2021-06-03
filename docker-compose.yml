@@ -14,7 +14,7 @@ services:
             - ./demo-network/keys:/root/.ethereum/keystore
         ports:
             - 8545:8545
-        command: --unlock 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --password /root/.ethereum/keystore/password --mine --minerthreads 1 --etherbase 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --rpc --rpcaddr 0.0.0.0 --rpcvhosts=* --rpcapi admin,eth,miner,personal,web3 --allow-insecure-unlock --nodiscover --nousb --gasprice 1
+        command: --unlock 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --password /root/.ethereum/keystore/password --mine --miner.threads 1 --miner.etherbase 0xc0A8e4D217eB85b812aeb1226fAb6F588943C2C2 --http --http.addr 0.0.0.0 --http.vhosts * --http.api admin,eth,miner,personal,web3 --allow-insecure-unlock --nodiscover --nousb --miner.gasprice 1
         depends_on:
             - contract_compiler
         networks: 

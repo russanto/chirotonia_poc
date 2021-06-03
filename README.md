@@ -1,1 +1,2 @@
-chirotonia_poc
+# Chirotonia (Proof of concept)
+Chirotonia is a voting system based on blockchain and linkable ring signatures. This repository implements a proof of concept using Ethereum and python scripts that mimic behavior of the actors involved in a voting session.
