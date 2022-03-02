@@ -13,7 +13,10 @@ class Contract:
             self.__contract = web3.eth.contract(abi=abi, bytecode=bytecode)
 
     def deploy(self, identity_manager):
-        tx_hash = self.__contract.constructor(identity_manager).transact()
+        tx_hash = self.__contract.constructor(identity_manager).transact({
+            "gas": 3000000,
+            "gasPrice": Web3.toWei(10, 'gwei')
+        })
         receipt = self.__web3.eth.waitForTransactionReceipt(tx_hash)
         self.__contract = self.__web3.eth.contract(address=receipt.contractAddress, abi=abi)
         self.identity_manager = identity_manager

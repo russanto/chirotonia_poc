@@ -28,7 +28,7 @@ contract Chirotonia {
         uint256[] votanti;
         mapping(uint256 => bool) votanteAccreditato;
         StatoVotazione stato;
-        uint256[] voti;
+        string[] voti;
         mapping(uint256 => bool) votiAccettati;
     }
     
@@ -39,6 +39,8 @@ contract Chirotonia {
     address public identityManager;
     
     address public privacyManager;
+
+    string encryptionKey;
     
     modifier onlyManager {
         require(msg.sender == manager);
@@ -47,6 +49,11 @@ contract Chirotonia {
     
     modifier onlyIdentityManager {
         require(msg.sender == identityManager);
+        _;
+    }
+    
+    modifier onlyPrivacyManager {
+        require(msg.sender == privacyManager);
         _;
     }
     
@@ -145,7 +152,8 @@ contract Chirotonia {
         uint256[2] calldata tag,
         uint256[] calldata tees,
         uint256 seed,
-        uint256 voto,
+        uint256 voteHash,
+        string calldata voto,
         string calldata _identificativoVotazione
     ) external {
         Votazione storage votazione = votazioni[_identificativoVotazione];
@@ -156,11 +164,18 @@ contract Chirotonia {
         // Verifica che il voto non sia stato già espresso
         require(!votazione.votiAccettati[tag[0]], "Voto già espresso");
         // Verifica la correttezza della firma ad anello
-        require(verifyRingSignature(voto, tag, tees, seed, _identificativoVotazione), "Firma non valida");
+        require(verifyRingSignature(voteHash, tag, tees, seed, _identificativoVotazione), "Firma non valida");
         // Aggiunge il voto a quelli accettati
         votazione.voti.push(voto);
         // Segna il votante come già votato
         votazione.votiAccettati[tag[0]] = true;
+    }
+    
+    function verificaTag(
+        string calldata _identificativoVotazione,
+        uint256 _xTag
+    ) external view returns (bool) {
+        return votazioni[_identificativoVotazione].votiAccettati[_xTag];
     }
 
     /**
@@ -173,10 +188,17 @@ contract Chirotonia {
     }
     
     /**
-        Recupera l'insieme di voti per una data votazione
+        Recupera l'i-esimo voto per una data votazione
      */
-    function getVoti(string calldata _identificativoVotazione) external view returns (uint256[] memory) {
-        return votazioni[_identificativoVotazione].voti;
+    function getVoto(string calldata _identificativoVotazione, uint256 index) external view returns (string memory) {
+        return votazioni[_identificativoVotazione].voti[index];
+    }
+
+    /**
+        Mostra il numero di voti salvati per una data votazione
+     */
+    function getNumeroVotiAcquisiti(string calldata _identificativoVotazione) external view returns (uint256) {
+        return votazioni[_identificativoVotazione].voti.length;
     }
     
     /**
@@ -184,6 +206,13 @@ contract Chirotonia {
      */
     function setPrivacyManager(address _privacyManager) external onlyManager {
         privacyManager = _privacyManager;
+    }
+    
+    /**
+        Imposta l'indirizzo del Privacy Manager per la crittazione dei voti
+     */
+    function setEncryptionKey(string calldata _encryptionKey) external onlyPrivacyManager {
+        encryptionKey = _encryptionKey;
     }
 
     /**
