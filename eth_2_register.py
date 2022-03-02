@@ -14,15 +14,16 @@ logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description='Simulate registration phase for a Chirotonia session')
 parser.add_argument("session", type=str, help="Session name to use")
 parser.add_argument("-e", "--endpoint", type=str, help="Custom rpc endpoint at port 8545", default='localhost')
+parser.add_argument("--no_sign", action="store_true")
 args = parser.parse_args()
 
 session_name = args.session
 
-w3 = Web3(HTTPProvider('http://' + args.endpoint + ':8545'))
+w3 = Web3(HTTPProvider('http://' + args.endpoint))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-if not w3.isConnected():
-    raise 'Connection to ethereum node failed'
+# if not w3.isConnected():
+#     raise 'Connection to ethereum node failed'
 
 with open("./runs/%s.json" % session_name) as session_file:
     session_conf = json.load(session_file)
@@ -44,8 +45,9 @@ if 'identityManagerPassword' not in session_conf:
     exit(1)
 
 w3.eth.defaultAccount = session_conf['identityManager']
-w3.geth.personal.unlockAccount(w3.eth.defaultAccount, session_conf['identityManagerPassword'])
-logger.info('Successfully unlocked identity manager account.')
+if not args.no_sign:
+    w3.geth.personal.unlockAccount(w3.eth.defaultAccount, session_conf['identityManagerPassword'])
+    logger.info('Successfully unlocked identity manager account.')
 
 chirotonia = Contract(w3, session_conf['mainContract'])
 

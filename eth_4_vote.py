@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description='Simulate registration phase for a Chirotonia session')
 parser.add_argument("session", type=str, help="Session name to use")
 parser.add_argument("-e", "--endpoint", type=str, help="Custom rpc endpoint at port 8545", default='localhost')
+parser.add_argument("--no_sign", action="store_true")
 vote_flag_group = parser.add_mutually_exclusive_group(required=True)
 vote_flag_group.add_argument("-v", "--vote", type=str, help="Name of vote to start")
 vote_flag_group.add_argument("-a", "--all", const=True, help="Start all votes specified in configuration", nargs='?')
@@ -21,11 +22,11 @@ args = parser.parse_args()
 
 session_name = args.session
 
-w3 = Web3(HTTPProvider('http://' + args.endpoint + ':8545'))
+w3 = Web3(HTTPProvider('http://' + args.endpoint))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-if not w3.isConnected():
-    raise 'Connection to ethereum node failed'
+# if not w3.isConnected():
+#     raise 'Connection to ethereum node failed'
 
 with open("./runs/%s.json" % session_name) as session_file:
     session_conf = json.load(session_file)
@@ -43,8 +44,9 @@ if "votersAddressPassword" not in session_conf:
     exit(1)
 
 w3.eth.defaultAccount = session_conf['votersAddress']
-w3.geth.personal.unlockAccount(w3.eth.defaultAccount, session_conf['votersAddressPassword'])
-logger.info('Voters account successfully unlocked')
+if not args.no_sign:
+    w3.geth.personal.unlockAccount(w3.eth.defaultAccount, session_conf['votersAddressPassword'])
+    logger.info('Voters account successfully unlocked')
 
 chirotonia = Contract(w3, session_conf['mainContract'])
 

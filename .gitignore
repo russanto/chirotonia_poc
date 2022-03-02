@@ -5,6 +5,10 @@
 *.abi
 *.bin
 
-__pycache__
-runs
 .venv
+.vscode
+
+__pycache__
+artifacts
+runs
+node_modules

@@ -18,7 +18,8 @@ logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser(description='Initialize a new Chirotonia session - Proof of concept for Chirotonia e-voting system')
 parser.add_argument("session", type=str, help="Session name to use as identifier for this session")
 parser.add_argument("-c", "--configuration", type=str, help="Custom demo configuration file. (default: eth_demo.json)", default='eth_demo.json')
-parser.add_argument("-e", "--endpoint", type=str, help="Custom rpc endpoint at port 8545", default='localhost')
+parser.add_argument("-e", "--endpoint", type=str, help="Custom rpc endpoint", default='localhost:8545')
+parser.add_argument("--no_sign", action="store_true")
 args = parser.parse_args()
 
 session_name = args.session
@@ -30,11 +31,11 @@ try:
 except:
     logger.error("Error with configuration file")
 
-w3 = Web3(HTTPProvider('http://' + args.endpoint + ':8545'))
+w3 = Web3(HTTPProvider('http://' + args.endpoint))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0) # only for PoA and dev networks
 
-if not w3.isConnected():
-    raise 'Connection to ethereum node failed'
+# if not w3.isConnected():
+#     raise 'Connection to ethereum node failed'
 
 if not os.path.exists("./runs"):
     os.makedirs("./runs")
@@ -58,8 +59,9 @@ if "managerPassword" not in chirotonia_conf:
     exit(1)
 
 w3.eth.defaultAccount = chirotonia_conf['manager']
-w3.geth.personal.unlockAccount(w3.eth.defaultAccount, chirotonia_conf['managerPassword'])
-logger.info('Manager account successfully unlocked')
+if not args.no_sign:
+    w3.geth.personal.unlockAccount(w3.eth.defaultAccount, chirotonia_conf['managerPassword'])
+    logger.info('Manager account successfully unlocked')
 
 chirotonia = Contract(w3)
 logger.info("Deploying Chirotonia contract")
